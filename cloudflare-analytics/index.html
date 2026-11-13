@@ -34,14 +34,34 @@
       <stacki-button id="open-settings" variant="primary">Open settings</stacki-button>
     </section>
 
+    <section id="cards-view" class="cards-view">
+      <div class="settings-head">
+        <h2>Settings</h2>
+        <stacki-button id="settings-back" variant="ghost">Back to dashboard</stacki-button>
+      </div>
+      <stacki-tabs id="settings-tab" value="connection" label="Settings">
+        <button value="connection">Connection</button>
+        <button value="cards">Cards</button>
+      </stacki-tabs>
+      <div id="tab-connection" class="tab-body">
+        <p>Your API token, zone ID, account ID and hostnames are kept in Stacki's app settings.</p>
+        <stacki-button id="open-native" variant="primary">Open connection settings</stacki-button>
+      </div>
+      <div id="tab-cards" class="tab-body" hidden>
+        <p>Choose which cards the dashboard shows. You can also hide a card with the ⋯ menu in its corner. Your choice is remembered on this computer.</p>
+        <ul class="toggles" id="toggles"></ul>
+        <stacki-button id="show-all" variant="ghost">Show all cards</stacki-button>
+      </div>
+    </section>
+
     <main id="dash" hidden>
       <div class="top">
-        <section class="card stat">
+        <section class="card stat" data-card="pageviews">
           <h2>Pageviews</h2>
           <p class="stat-row"><span class="stat-n" id="w-pv">–</span><span class="stat-d" id="w-pv-d"></span></p>
           <svg class="spark" id="w-pv-spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
         </section>
-        <section class="card stat">
+        <section class="card stat" data-card="visits">
           <h2>Total visits</h2>
           <p class="stat-row"><span class="stat-n" id="w-visits">–</span><span class="stat-d" id="w-visits-d"></span></p>
           <svg class="spark" id="w-visits-spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"></svg>
@@ -49,7 +69,7 @@
       </div>
       <p class="web-msg" id="web-msg" hidden></p>
 
-      <section class="wide">
+      <section class="wide" data-card="human-ai">
         <h2>Human vs AI</h2>
         <div class="kpis">
           <div class="kpi"><span class="kpi-n" id="k-human">–</span><span class="kpi-l">Human page views</span><span class="kpi-d" id="d-human"></span></div>

@@ -641,12 +641,95 @@ async function load() {
   }
 }
 
+/* ---------- Cards on/off: remembered on this computer ---------- */
+const cardView = (function () {
+  const KEY = 'card-hidden';
+  const all = () => [...document.querySelectorAll('#dash [data-card], #dash .cards > .card')];
+  for (const c of document.querySelectorAll('.cards > .card')) c.dataset.card = c.querySelector('ol').id;
+  const title = (c) => c.querySelector('h2').firstChild.textContent.trim();
+  let hidden = new Set();
+  try { hidden = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...hidden])); } catch {} };
+  function apply() {
+    for (const c of all()) c.hidden = hidden.has(c.dataset.card);
+    const list = $('toggles');
+    list.textContent = '';
+    for (const c of all()) {
+      const li = document.createElement('li');
+      const label = document.createElement('label');
+      label.className = 'switch';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.setAttribute('role', 'switch');
+      box.checked = !hidden.has(c.dataset.card);
+      box.addEventListener('change', () => set(c.dataset.card, !box.checked));
+      const track = document.createElement('i');
+      track.className = 'track';
+      const text = document.createElement('span');
+      text.textContent = title(c);
+      label.append(box, track, text);
+      li.append(label);
+      list.append(li);
+    }
+  }
+  function set(id, off) { if (off) hidden.add(id); else hidden.delete(id); save(); apply(); }
+  // three dots menu in each card corner
+  const menu = document.createElement('div');
+  menu.className = 'card-menu';
+  menu.hidden = true;
+  const hide = document.createElement('button');
+  hide.type = 'button';
+  hide.textContent = 'Hide card';
+  menu.append(hide);
+  document.body.append(menu);
+  let target = null;
+  const close = () => { menu.hidden = true; target = null; };
+  hide.addEventListener('click', () => { if (target) set(target, true); close(); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.more') && !e.target.closest('.card-menu')) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  for (const c of all()) {
+    const h2 = c.querySelector('h2');
+    const tools = document.createElement('span');
+    tools.className = 'tools';
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'more';
+    more.title = 'Card options';
+    more.setAttribute('aria-label', `Options for ${title(c)}`);
+    more.setAttribute('aria-haspopup', 'menu');
+    more.textContent = '⋯';
+    more.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!menu.hidden && target === c.dataset.card) return close();
+      target = c.dataset.card;
+      const r = more.getBoundingClientRect();
+      menu.hidden = false;
+      menu.style.top = `${r.bottom + 4}px`;
+      menu.style.left = `${Math.max(8, r.right - menu.offsetWidth)}px`;
+      hide.focus();
+    });
+    tools.append(more);
+    h2.append(tools);
+  }
+  $('show-all').addEventListener('click', () => { hidden.clear(); save(); apply(); });
+  const tab = () => {
+    const v = $('settings-tab').value || 'connection';
+    $('tab-connection').hidden = v !== 'connection';
+    $('tab-cards').hidden = v !== 'cards';
+  };
+  $('settings-tab').addEventListener('change', tab);
+  $('settings-back').addEventListener('click', () => { delete document.body.dataset.view; });
+  $('open-native').addEventListener('click', () => stacki.app.openSettings());
+  window.openAppSettings = () => { document.body.dataset.view = 'settings'; tab(); };
+  apply();
+})();
+
 /* ---------- Draggable cards: order is remembered on this computer ---------- */
 (function cardOrder() {
   const grid = document.querySelector('.cards');
   const KEY = 'card-order';
   const cards = () => [...grid.querySelectorAll(':scope > .card')];
-  const idOf = (c) => c.querySelector('ol').id;
+  const idOf = (c) => c.dataset.card;
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cards().map(idOf))); } catch {} };
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
@@ -659,9 +742,9 @@ async function load() {
     handle.title = 'Drag to reorder (or use the arrow keys)';
     handle.setAttribute('aria-label', `Move ${card.querySelector('h2').textContent}`);
     handle.textContent = '⋮⋮';
-    card.querySelector('h2').append(handle);
+    card.querySelector('.tools').append(handle);
     handle.addEventListener('keydown', (e) => {
-      const list = cards();
+      const list = cards().filter((x) => !x.hidden);
       const i = list.indexOf(card);
       const to = e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? i - 1 : e.key === 'ArrowDown' || e.key === 'ArrowRight' ? i + 1 : null;
       if (to === null || to < 0 || to >= list.length) return;
@@ -697,7 +780,7 @@ async function load() {
 $('range').addEventListener('change', load);
 $('compare').addEventListener('change', load);
 $('refresh').addEventListener('click', load);
-$('settings').addEventListener('click', () => stacki.app.openSettings());
+$('settings').addEventListener('click', () => window.openAppSettings());
 $('open-settings').addEventListener('click', () => stacki.app.openSettings());
 stacki.on('settings.change', load);
 
