@@ -32,6 +32,8 @@ Press the gear in the header. The in-app settings have two tabs:
 - **Connection:** opens Stacki's app settings, where your API token, zone ID, account ID and hostnames live.
 - **Cards:** an on/off toggle for every card. Switch off the ones you don't want on your dashboard, and switch them on again whenever you like.
 
+**Move cards around.** Drag a card by its ⋮⋮ handle to put it where you want it, or focus the handle and use the arrow keys. The order is remembered.
+
 **Hide a card.** Use the ⋯ menu in a card's top corner, next to the ⋮⋮ drag handle, and choose **Hide card**. Its toggle in the settings goes off at the same time.
 
 **Add a card back.** While a card is hidden, a dashed **+** tile sits last in the card grid. Click it to open the Cards tab, or use **Show all cards** to bring everything back.
