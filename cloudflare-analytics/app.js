@@ -327,24 +327,26 @@ function render(agg, info, cmp) {
     el.className = `kpi-d ${d ? d.cls : ''}`;
   };
   $('k-human').textContent = fmt(agg.human);
-  $('k-bot').textContent = fmt(agg.bot);
-  $('k-share').textContent = pct(agg.bot, all);
   $('k-ai').textContent = fmt(agg.ai);
+  $('k-share').textContent = pct(agg.ai, all);
   kpiDelta('d-human', agg.human, cmp ? cmp.agg.human : 0);
-  kpiDelta('d-bot', agg.bot, cmp ? cmp.agg.bot : 0);
   kpiDelta('d-ai', agg.ai, cmp ? cmp.agg.ai : 0);
   const shareEl = $('d-share');
   if (cmp && pall && all) {
-    const pts = (agg.bot / all - cmp.agg.bot / pall) * 100;
+    const pts = (agg.ai / all - cmp.agg.ai / pall) * 100;
     shareEl.textContent = `${pts > 0 ? '+' : ''}${pts.toFixed(1)} pts vs before`;
     shareEl.className = `kpi-d ${pts > 0 ? 'up' : pts < 0 ? 'down' : ''}`;
   } else { shareEl.textContent = ''; shareEl.className = 'kpi-d'; }
+  $('l-human').textContent = `${fmt(agg.human)} (${pct(agg.human, all)})`;
+  $('l-ai').textContent = `${fmt(agg.ai)} (${pct(agg.ai, all)})`;
+  $('l-other').textContent = `${fmt(Math.max(agg.bot - agg.ai, 0))} (${pct(Math.max(agg.bot - agg.ai, 0), all)})`;
   $('split').querySelector('.s-human').style.width = all ? `${(agg.human / all) * 100}%` : '0';
-  $('split').querySelector('.s-bot').style.width = all ? `${(agg.bot / all) * 100}%` : '0';
+  $('split').querySelector('.s-ai').style.width = all ? `${(agg.ai / all) * 100}%` : '0';
+  $('split').querySelector('.s-other').style.width = all ? `${(Math.max(agg.bot - agg.ai, 0) / all) * 100}%` : '0';
 
   const v = views(agg);
   const dl = (key) => {
-    if (!cmp) return undefined;
+    if (!cmp || !info.cardCmp) return undefined;
     const m = new Map(pv[key].map((e) => [e[0], e[1]]));
     return (label, n) => change(n, days, m.get(label) || 0, cmp.days);
   };
@@ -366,7 +368,7 @@ function render(agg, info, cmp) {
   rows($('browsers'), v.browsers, { max: 10, delta: dl('browsers') });
 
   const notes = [
-    'Page views are HTML requests Cloudflare counted at the edge, estimated from adaptive samples. Bots are told apart by user agent, so a bot that poses as a browser counts as human.',
+    'Page views are HTML requests Cloudflare counted at the edge, estimated from adaptive samples. Bots are told apart by user agent, so a bot that poses as a browser counts as human. AI share is the part of all page views (humans and all bots) that comes from AI crawlers.',
     'Brave and some privacy browsers look like Chrome and appear under Chrome.',
   ];
   if (!info.html && info.paths) notes.push('Page views leave out static files by path, because this plan cannot filter on content type.');
@@ -574,8 +576,10 @@ async function load() {
 
   const days = Number($('range').value) || 7;
   // The comparison always has the same length as the range: 24 h vs the 24 h before, 7 days vs the 7 days before, 30 days vs the 30 days before.
-  const cmpDays = $('compare').value === '1' ? days : 0;
-  $('compare-on').textContent = days === 1 ? 'vs previous 24 h' : `vs previous ${days} days`;
+  // The big numbers at the top always compare with the previous period. The tabs only switch the comparison on the detail cards.
+  const cmpDays = days;
+  const cardCmp = $('compare').value === '1';
+  $('compare-on').textContent = days === 1 ? 'Cards vs previous 24 h' : `Cards vs previous ${days} days`;
   const opts = { ads: true, deviceType: true, html: false, paths: true, referrer: true, country: true };
   const now = new Date();
   const windowsFor = (n, offset) => Array.from({ length: n }, (_, i) => [new Date(now - (offset + i + 1) * DAY), new Date(now - (offset + i) * DAY)]);
@@ -625,7 +629,7 @@ async function load() {
       fromWeb = use.refs;
       if (w.bdCur.notes.length) cmpNote = `${cmpNote} Web Analytics breakdown: ${w.bdCur.notes.join('; ')}`.trim();
     }
-    render(cur.agg, { ads: opts.ads, html: opts.html, paths: opts.paths, referrer: opts.referrer, country: opts.country, loaded: cur.loaded, wanted: days, cmpNote, refsFromWeb: fromWeb }, cmp);
+    render(cur.agg, { ads: opts.ads, html: opts.html, paths: opts.paths, referrer: opts.referrer, country: opts.country, loaded: cur.loaded, wanted: days, cmpNote, refsFromWeb: fromWeb, cardCmp }, cmp);
     const label = days === 1 ? 'the last 24 hours' : `the last ${days} days`;
     setStatus(`Showing ${label}. Updated ${new Date().toLocaleTimeString()}.`);
     if (cur.firstError && cur.loaded < days) setStatus(`Showing ${cur.loaded} of ${days} days. ${cur.firstError.message}`, true);
