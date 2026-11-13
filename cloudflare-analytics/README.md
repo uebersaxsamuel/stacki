@@ -25,6 +25,19 @@ Your Cloudflare traffic inside Stacki, with a focus on one question: **which AI 
 
 A switch above the cards compares them with the previous period as well. The top numbers always compare.
 
+## Settings
+
+Press the gear in the header. The in-app settings have two tabs:
+
+- **Connection:** opens Stacki's app settings, where your API token, zone ID, account ID and hostnames live.
+- **Cards:** an on/off toggle for every card. Switch off the ones you don't want on your dashboard, and switch them on again whenever you like.
+
+**Hide a card.** Use the ⋯ menu in a card's top corner, next to the ⋮⋮ drag handle, and choose **Hide card**. Its toggle in the settings goes off at the same time.
+
+**Add a card back.** While a card is hidden, a dashed **+** tile sits last in the card grid. Click it to open the Cards tab, or use **Show all cards** to bring everything back.
+
+Your choices are remembered on this computer.
+
 ## Install
 
 In Stacki: **Load App From GitHub** → `uebersaxsamuel/stacki` → `cloudflare-analytics`. Or download `cloudflare-analytics.zip` from the [latest release](https://github.com/uebersaxsamuel/stacki/releases/latest) and use **Upload app file → Install → Open**.
