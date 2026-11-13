@@ -652,6 +652,8 @@ const cardView = (function () {
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...hidden])); } catch {} };
   function apply() {
     for (const c of all()) c.hidden = hidden.has(c.dataset.card);
+    $('add-card').hidden = !all().some((c) => c.hidden);
+    document.querySelector('.cards').append($('add-card'));
     const list = $('toggles');
     list.textContent = '';
     for (const c of all()) {
@@ -672,7 +674,9 @@ const cardView = (function () {
       list.append(li);
     }
   }
-  function set(id, off) { if (off) hidden.add(id); else hidden.delete(id); save(); apply(); }
+  function set(id, off) {
+    if (off) { const el = all().find((c) => c.dataset.card === id); if (el && el.offsetHeight) $('add-card').style.minHeight = `${el.offsetHeight}px`; }
+    if (off) hidden.add(id); else hidden.delete(id); save(); apply(); }
   // three dots menu in each card corner
   const menu = document.createElement('div');
   menu.className = 'card-menu';
@@ -720,7 +724,12 @@ const cardView = (function () {
   $('settings-tab').addEventListener('change', tab);
   $('settings-back').addEventListener('click', () => { delete document.body.dataset.view; });
   $('open-native').addEventListener('click', () => stacki.app.openSettings());
-  window.openAppSettings = () => { document.body.dataset.view = 'settings'; tab(); };
+  window.openAppSettings = (which) => {
+    if (which) { $('settings-tab').setAttribute('value', which); try { $('settings-tab').value = which; } catch {} }
+    document.body.dataset.view = 'settings';
+    tab();
+  };
+  $('add-card').addEventListener('click', () => window.openAppSettings('cards'));
   apply();
 })();
 
@@ -775,6 +784,7 @@ const cardView = (function () {
     grid.insertBefore(drag, before ? over : over.nextSibling);
   });
   grid.addEventListener('drop', (e) => e.preventDefault());
+  grid.append($('add-card'));
 })();
 
 $('range').addEventListener('change', load);

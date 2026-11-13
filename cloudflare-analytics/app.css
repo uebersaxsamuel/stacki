@@ -97,3 +97,7 @@ body[data-view="settings"] #dash, body[data-view="settings"] #setup, body[data-v
 .switch input:checked + .track { background: var(--stacki-accent, #2f7cf6); }
 .switch input:checked + .track::after { transform: translateX(0.85rem); }
 .switch input:focus-visible + .track { outline: 2px solid var(--stacki-accent, #2f7cf6); outline-offset: 2px; }
+
+.add-card { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; min-height: 9rem; cursor: pointer; font-size: 2rem; font-weight: 200; line-height: 1; color: var(--stacki-text-faint); border: 1px dashed var(--stacki-line); border-radius: var(--stacki-radius); align-self: stretch; }
+.add-card:hover, .add-card:focus-visible { color: var(--stacki-text); background: var(--stacki-bg-hover); }
+.add-card[hidden] { display: none; }
